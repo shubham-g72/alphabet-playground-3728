@@ -1,0 +1,145 @@
+{
+  "project_name": "Hello World — The Genesis Canvas",
+  "theme": "dark",
+  "archetype": "SWISS & HIGH-CONTRAST + EDITORIAL PRECISION (Authority, Clarity, Tactile Beauty)",
+  "design_rationale": "A 'Hello World' app is typically banal and empty. Here it is transformed into an exquisite typographic celebration of software genesis: mixing high-contrast Swiss editorial typography with an interactive architectural terminal canvas, interactive live greeting in multi-languages, audio/haptic click feedback illusion, and tactile dev controls.",
+  "colors": {
+    "surfaces": [
+      {
+        "name": "page",
+        "kind": "solid",
+        "bg": "#0D0E12",
+        "on_bg": "#F3F4F6",
+        "on_bg_muted": "#9CA3AF"
+      },
+      {
+        "name": "panel",
+        "kind": "solid",
+        "bg": "#151821",
+        "on_bg": "#F9FAFB",
+        "on_bg_muted": "#94A3B8"
+      },
+      {
+        "name": "inverse",
+        "kind": "solid",
+        "bg": "#F3F4F6",
+        "on_bg": "#0D0E12",
+        "on_bg_muted": "#4B5563"
+      },
+      {
+        "name": "glass_card",
+        "kind": "glass",
+        "contrast_against": "#181B26",
+        "guarantee": "scrim: bg-black/60 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.36)]",
+        "on_bg": "#FFFFFF",
+        "on_bg_muted": "#9CA3AF",
+        "roles": {
+          "link": "#60A5FA",
+          "error": "#F87171",
+          "success": "#34D399"
+        }
+      },
+      {
+        "name": "code_badge",
+        "kind": "solid",
+        "bg": "#1E2333",
+        "on_bg": "#38BDF8",
+        "on_bg_muted": "#7DD3FC"
+      }
+    ],
+    "accent": "#38BDF8",
+    "on_accent": "#030712"
+  },
+  "typography": {
+    "primary_font": "Space Grotesk",
+    "heading_font": "Space Grotesk",
+    "body_font": "Instrument Sans",
+    "mono_font": "JetBrains Mono",
+    "import_statements": [
+      "@import \"@fontsource-variable/space-grotesk\";",
+      "@import \"@fontsource-variable/instrument-sans\";",
+      "@import \"@fontsource-variable/jetbrains-mono\";"
+    ],
+    "scale_px": {
+      "display": 60,
+      "h1": 48,
+      "h2": 36,
+      "h3": 24,
+      "body": 16,
+      "caption": 14
+    },
+    "rules": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-none uppercase",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight",
+      "h3": "text-xl sm:text-2xl font-semibold tracking-normal",
+      "body": "text-base font-normal leading-relaxed text-gray-300",
+      "caption": "text-sm font-medium tracking-wide text-gray-400 uppercase",
+      "mono_label": "text-xs font-mono tracking-widest uppercase text-cyan-400"
+    }
+  },
+  "entry_surfaces": {
+    "/": "split asymmetric editorial hero — monumental 'HELLO WORLD' typography + live interactive language switcher left, live execution playground & environment telemetry card right"
+  },
+  "grids": {
+    "system": "Mode A Tetris Grid with Swiss precision borders",
+    "layout_classes": "grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20"
+  },
+  "component_structure": {
+    "header": {
+      "classes": "sticky top-0 z-50 backdrop-blur-xl bg-[#0D0E12]/80 border-b border-white/10 px-6 py-4 flex items-center justify-between",
+      "elements": [
+        "Brand mark with terminal prompt symbol `>_ HELLO.WORLD`",
+        "Live system timestamp & uptime counter chip",
+        "GitHub repository star counter button or copy code pill",
+        "Interactive audio chime toggle or theme indicator"
+      ]
+    },
+    "hero_section": {
+      "left_col": "lg:col-span-7 space-y-8",
+      "elements": [
+        "Kicker pill: `[STATUS: 200 OK] // ORIGIN COMPILATION`",
+        "Monumental H1: 'HELLO WORLD.' with subtle gradient shimmer and typographic tension",
+        "Interactive Language Carousel/Pills: English ('Hello, World!'), Spanish ('¡Hola, Mundo!'), Japanese ('こんにちは 世界'), French ('Bonjour le monde'), Rust (`println!(\"Hello, world!\");`), Python (`print(\"Hello, World!\")`)",
+        "Interactive 'Ping the World' primary CTA button triggering toast notification via Sonner and pulse wave animation",
+        "Secondary action: 'Copy Snippet' button with clipboard feedback state"
+      ],
+      "right_col": "lg:col-span-5 space-y-6",
+      "elements": [
+        "Card with code block preview in JetBrains Mono with syntax highlighting style",
+        "Telemetry stats row (Render time < 4ms, Client: React 19, Bundle: Vite, Engine: Farm-TS)",
+        "Interactive click counter: 'Greetings Dispatched: 1,337+' incrementing on tap",
+        "Mini terminal output box displaying real-time greeting logs"
+      ]
+    },
+    "footer": {
+      "classes": "border-t border-white/10 py-12 px-6 mt-20 text-center flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400",
+      "elements": [
+        "Crafted with React 19 + Tailwind v4 + Base-UI",
+        "Data-testid verified static build"
+      ]
+    }
+  },
+  "motion": {
+    "engine": "motion (from motion/react)",
+    "micro_interactions": [
+      "Subtle entrance stagger on hero typography and code blocks",
+      "Button active click compression scale (0.97)",
+      "Interactive language pill switch fade-in with easeInOut transition (0.2s)",
+      "Sonar pulse wave ring on the 'Ping the World' action button"
+    ],
+    "accessibility": "Respect prefers-reduced-motion via motion classes and CSS media queries"
+  },
+  "accessibility": {
+    "apca_contrast": "All text tokens exceed 4.5:1 against #0D0E12, #151821 and #1E2333 surfaces.",
+    "testing_attributes": "All interactive elements and metrics MUST include descriptive kebab-case `data-testid` (e.g. data-testid='ping-world-button', data-testid='language-select-rust', data-testid='greeting-display-heading', data-testid='copy-snippet-button', data-testid='greeting-counter-badge')."
+  },
+  "instructions_to_main_agent": [
+    "1. Replace font imports in frontend/src/index.css with `@import \"@fontsource-variable/space-grotesk\";` and `@import \"@fontsource-variable/instrument-sans\";` and `@import \"@fontsource-variable/jetbrains-mono\";`.",
+    "2. Configure `--font-sans: 'Instrument Sans Variable', sans-serif;` and `--font-heading: 'Space Grotesk Variable', sans-serif;` and `--font-mono: 'JetBrains Mono Variable', monospace;` in `@theme inline` in `frontend/src/index.css`.",
+    "3. Set `html` tag to class='dark' in `frontend/index.html` for deep rich obsidian dark mode.",
+    "4. Build the page in `frontend/src/pages/Home.tsx` (already mounted in `App.tsx`) with pure HTML + Tailwind + customized shadcn/ui components (`Button`, `Badge`, `Card`, `Sonner Toaster`).",
+    "5. Use `data-testid` attributes on every interactive element and text output.",
+    "6. Ensure no external network requests or broken backend gates are added since user specified a static Hello World page only.",
+    "7. Mount `<Toaster />` from `@/components/ui/sonner` so Sonner toasts work cleanly when user clicks 'Ping the World'."
+  ]
+}
