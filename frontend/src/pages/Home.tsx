@@ -1,11 +1,14 @@
 import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import { toast } from "sonner";
 import { Check, Copy, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
+import { apiGet, apiPost } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
+// Mirrors backend/models/greeting.py — keep the two in sync.
 interface Greeting {
   id: string;
   label: string;
@@ -13,14 +16,15 @@ interface Greeting {
   mono?: boolean;
 }
 
-const GREETINGS: Greeting[] = [
-  { id: "english", label: "English", text: "Hello, World!" },
-  { id: "spanish", label: "Español", text: "¡Hola, Mundo!" },
-  { id: "japanese", label: "日本語", text: "こんにちは 世界" },
-  { id: "french", label: "Français", text: "Bonjour le monde" },
-  { id: "python", label: "Python", text: 'print("Hello, World!")', mono: true },
-  { id: "rust", label: "Rust", text: 'println!("Hello, world!");', mono: true },
-];
+interface DispatchResult {
+  total: number;
+  greeting_id: string;
+  dispatched_at: string;
+}
+
+interface DispatchStats {
+  total: number;
+}
 
 const SNIPPET = `export default function App() {
   return <h1>Hello, World!</h1>;
@@ -29,22 +33,51 @@ const SNIPPET = `export default function App() {
 const STATS = [
   { id: "client", label: "Client", value: "React 19" },
   { id: "bundler", label: "Bundler", value: "Vite" },
-  { id: "styles", label: "Styles", value: "Tailwind v4" },
+  { id: "api", label: "API", value: "FastAPI" },
   { id: "status", label: "Status", value: "200 OK" },
 ];
 
 export default function Home() {
-  const [active, setActive] = useState<Greeting>(GREETINGS[0]);
-  const [count, setCount] = useState(0);
+  const queryClient = useQueryClient();
+
+  const greetingsQuery = useQuery<Greeting[]>({
+    queryKey: ["greetings"],
+    queryFn: () => apiGet<Greeting[]>("/greetings"),
+  });
+  const greetings = greetingsQuery.data ?? [];
+
+  const statsQuery = useQuery<DispatchStats>({
+    queryKey: ["greetings", "stats"],
+    queryFn: () => apiGet<DispatchStats>("/greetings/stats"),
+  });
+  const count = statsQuery.data?.total ?? 0;
+
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [pulse, setPulse] = useState(0);
   const [copied, setCopied] = useState(false);
   const [logs, setLogs] = useState<string[]>(["> booting hello.world ... ok"]);
 
+  const active = greetings.find((g) => g.id === activeId) ?? greetings[0];
+
+  const dispatch = useMutation({
+    mutationFn: (greetingId: string) =>
+      apiPost<DispatchResult>(`/greetings/${greetingId}/dispatch`),
+    onSuccess: (res) => {
+      setPulse((p) => p + 1);
+      setLogs((l) =>
+        [`> ping #${res.total}: ${active?.text ?? ""}`, ...l].slice(0, 5),
+      );
+      queryClient.invalidateQueries({ queryKey: ["greetings", "stats"] });
+      toast.success(active?.text ?? "Hello, World!", {
+        description: "Greeting dispatched to the world.",
+      });
+    },
+    onError: () => toast.error("Could not reach the greeting API"),
+  });
+
   const ping = () => {
-    setCount((c) => c + 1);
-    setPulse((p) => p + 1);
-    setLogs((l) => [`> ping #${count + 1}: ${active.text}`, ...l].slice(0, 5));
-    toast.success(active.text, { description: "Greeting dispatched to the world." });
+    if (!active) return;
+    dispatch.mutate(active.id);
   };
 
   const copySnippet = async () => {
@@ -77,7 +110,7 @@ export default function Home() {
           className="space-y-10 lg:col-span-7"
         >
           <p data-testid="hero-kicker" className="font-mono text-xs uppercase tracking-widest text-sky-400">
-            [status: 200 ok] // origin compilation
+            [status: 200 ok] // served by fastapi
           </p>
           <h1
             data-testid="hero-heading"
@@ -90,32 +123,39 @@ export default function Home() {
 
           <div className="min-h-16">
             <AnimatePresence mode="wait">
-              <motion.p
-                key={active.id}
-                data-testid="greeting-display"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.2, ease: "easeInOut" }}
-                className={cn("text-2xl text-gray-300 sm:text-3xl", active.mono ? "font-mono text-sky-300" : "font-heading")}
-              >
-                {active.text}
-              </motion.p>
+              {active && (
+                <motion.p
+                  key={active.id}
+                  data-testid="greeting-display"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  className={cn("text-2xl text-gray-300 sm:text-3xl", active.mono ? "font-mono text-sky-300" : "font-heading")}
+                >
+                  {active.text}
+                </motion.p>
+              )}
             </AnimatePresence>
           </div>
 
           <div className="flex flex-wrap gap-2" role="tablist" aria-label="Choose a language">
-            {GREETINGS.map((g) => (
+            {greetingsQuery.isLoading && (
+              <span data-testid="greetings-loading" className="font-mono text-xs text-gray-500">
+                loading greetings…
+              </span>
+            )}
+            {greetings.map((g) => (
               <button
                 key={g.id}
                 type="button"
                 role="tab"
-                aria-selected={active.id === g.id}
+                aria-selected={active?.id === g.id}
                 data-testid={`language-select-${g.id}`}
-                onClick={() => setActive(g)}
+                onClick={() => setActiveId(g.id)}
                 className={cn(
                   "rounded-full border px-4 py-1.5 text-sm transition-[background-color,color,border-color,transform] duration-200 active:scale-95",
-                  active.id === g.id
+                  active?.id === g.id
                     ? "border-sky-400 bg-sky-400 text-gray-950"
                     : "border-white/15 text-gray-300 hover:border-white/40 hover:text-white",
                 )}
@@ -134,9 +174,10 @@ export default function Home() {
                 data-testid="ping-world-button"
                 size="lg"
                 onClick={ping}
+                disabled={!active || dispatch.isPending}
                 className="relative h-12 bg-sky-400 px-6 text-base font-semibold text-gray-950 transition-[background-color,transform] hover:bg-sky-300 active:scale-[0.97]"
               >
-                <Radio className="size-4" /> Ping the World
+                <Radio className="size-4" /> {dispatch.isPending ? "Pinging…" : "Ping the World"}
               </Button>
             </div>
             <Button
@@ -200,7 +241,7 @@ export default function Home() {
       </main>
 
       <footer className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 border-t border-white/10 px-6 py-10 text-sm text-gray-400 sm:flex-row">
-        <span data-testid="footer-credit">Crafted with React 19 + Tailwind v4</span>
+        <span data-testid="footer-credit">Crafted with React 19 + Tailwind v4 + FastAPI</span>
         <span className="font-mono text-xs uppercase tracking-widest">hello, world — since 1972</span>
       </footer>
       <Toaster />

@@ -1,0 +1,67 @@
+{
+  "iteration": 1,
+  "summary": "All 7 acceptance criteria verified: 3 backend test files (4 tests) + 5 browser checks, all passed.",
+  "passed": 8,
+  "failed": 0,
+  "retest_needed": false,
+  "bugs": [],
+  "action_items": [],
+  "checks": [
+    {
+      "criterion": "Greeting pills are loaded from the backend API, not hardcoded",
+      "name": "test_tscheck_greetings_list.py",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "GET /api/greetings -> 200, 6 entries with ids {english,spanish,japanese,french,python,rust}; python entry mono=true, text='print(\"Hello, World!\")'"
+    },
+    {
+      "criterion": "Greeting pills are loaded from the backend API, not hardcoded",
+      "name": "greeting-pills-loaded",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Page renders all 6 testids language-select-{english,spanish,japanese,french,python,rust} after load"
+    },
+    {
+      "criterion": "Selecting a language pill switches the displayed greeting",
+      "name": "language-pill-switches-greeting",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Clicking language-select-python shows 'print(\"Hello, World!\")' in greeting-display; clicking language-select-japanese shows 'こんにちは 世界'"
+    },
+    {
+      "criterion": "Ping the World hits the backend dispatch endpoint and increments a server-backed counter",
+      "name": "ping-world-increments-counter",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "POST /api/greetings/english/dispatch -> 200; greeting-counter incremented by 1 and persisted after page.reload(). Also re-ran successfully against public preview URL."
+    },
+    {
+      "criterion": "Terminal log records each ping",
+      "name": "terminal-log-records-ping",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "After clicking ping with Spanish selected, terminal-log contains text matching /ping #\\d+: ¡Hola, Mundo!/"
+    },
+    {
+      "criterion": "Copy Snippet works",
+      "name": "copy-snippet-shows-copied",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "After granting clipboard permissions in the test context and clicking copy-snippet-button, button text changes to 'Copied'. Note: without explicit clipboard-write permission, headless Chromium rejects navigator.clipboard.writeText causing the app's catch-block toast.error('Clipboard unavailable') path instead -- this is a harness permission requirement, not an app defect (confirmed by passing once permission granted)."
+    },
+    {
+      "criterion": "Backend returns 404 for unknown greeting id",
+      "name": "test_tscheck_greeting_404.py",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "GET /api/greetings/nope -> 404 {detail:'greeting not found'}; POST /api/greetings/nope/dispatch -> 404 {detail:'greeting not found'}"
+    },
+    {
+      "criterion": "Stats endpoint reflects total dispatches",
+      "name": "test_tscheck_stats_increment.py",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "GET /api/greetings/stats before={total:N}; POST /api/greetings/english/dispatch -> 200; GET stats after={total:N+1}, delta assertion passed"
+    }
+  ]
+}

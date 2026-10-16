@@ -60,6 +60,10 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
+# Feature routers
+from routers.greetings import router as greetings_router
+api_router.include_router(greetings_router)
+
 # Include the router in the main app
 app.include_router(api_router)
 
